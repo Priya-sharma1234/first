@@ -1,61 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landing Page</title>
-    <link rel="stylesheet" href="landing page.css">
-</head>
-<body>
-    <img src="office image.jpg">
-    <header>
-        <h1>Welcome to Our Landing Page</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <main>
-        <section id="hero-section">
-            <h2>Welcome to Our Website</h2>
-            <p> this is a website for gym workers.they can find our gym on social media through it and also can register online. </p>    <a href="#" class="button">Learn More</a>
-        </section>
-        <section id="about-section">
-            <h2>About Us</h2>
-            <p>Hello,<br>we are here for providing best gym service to those who are interested to make their body perfect. </p>
-        </section>
-        <section id="services-section">
-            <h2>Our Services</h2>
-            <ul>
-                <li>Top gym machines</li>
-                <li>Top trainers</li>
-                <li>Diet paln</li>
-                <li>Flexble timing</li>
-            </ul>
-        </section>
-        <section id="contact-section">
-            <h2>Contact Us</h2>
-            <form>
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name"><br>
+#include <SoftwareSerial.h>
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email"><br>
+#define VIBRATION_SENSOR 3  // Digital Pin for SW-420
+#define MIC_SENSOR A0       // Analog Pin for Microphone
+#define BUZZER 5            // Buzzer Pin
+#define ALERT_LED 6         // Alert LED Pin
 
-                <label for="message">Message:</label>
-                <textarea id="message" name="message"></textarea><br>
+SoftwareSerial BT(2, 11); // HC-05 TX to D10, RX to D11
 
-                <input type="submit" value="Submit">
-            </form>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 - Landing Page</p>
-    </footer>
-</body>
-</html>
+int vibrationState = 0;
+int noiseThreshold = 470;  // Adjust based on microphone readings
+int vibrationThreshold = 1; // Adjust based on vibration readings
+
+void setup() {
+    pinMode(VIBRATION_SENSOR, INPUT);
+    pinMode(BUZZER, OUTPUT);
+    pinMode(ALERT_LED, OUTPUT);
+    pinMode(MIC_SENSOR,INPUT);
+    BT.begin(9600);  // Bluetooth module baud rate
+    Serial.begin(9600);
+}
+
+void loop() {
+    vibrationState = digitalRead(VIBRATION_SENSOR);
+    int noiseLevel = analogRead(MIC_SENSOR);
+    Serial.println(noiseLevel);
+    if (vibrationState == HIGH) {
+        BT.println("Excessive vibration detected !! Please, Check the system.");
+    }
+
+    if (noiseLevel > noiseThreshold) {
+        BT.println("Excessive noise detected !! Please, Check the system.");
+        
+        alertSystem();
+    }
+
+    delay(500);
+}
+
+void alertSystem() {
+    digitalWrite(BUZZER, HIGH);
+    digitalWrite(ALERT_LED, HIGH);
+    delay(100);
+    digitalWrite(BUZZER, LOW);
+    digitalWrite(ALERT_LED, LOW);
+    delay(100);
+    digitalWrite(BUZZER, HIGH);
+    digitalWrite(ALERT_LED, HIGH);
+    delay(100);
+    digitalWrite(BUZZER, LOW);
+    digitalWrite(ALERT_LED, LOW);
+    delay(100);
+}
